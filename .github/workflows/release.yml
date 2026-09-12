@@ -83,6 +83,8 @@ jobs:
 
           **Gemini CLI**: \`gemini extensions install https://github.com/neo4j-contrib/neo4j-skills\`
 
+          **Qoder**: \`npx skills add https://github.com/jpadams/neo4j-skills -a qoder\` (IDE), or \`qoder plugins marketplace add jpadams/neo4j-skills && qoder plugins install neo4j-skills\` (CLI)
+
           **Cursor / Cline / Windsurf**: \`npx skills add neo4j-contrib/neo4j-skills\`
           EOF
           )

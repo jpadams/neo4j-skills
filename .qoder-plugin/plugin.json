@@ -1,0 +1,21 @@
+{
+  "name": "neo4j-skills",
+  "version": "1.0.1",
+  "displayName": "Neo4j Graph Database",
+  "description": "Agent skills for Neo4j — Cypher queries, graph modeling, drivers, imports, GraphRAG, GDS, vector indexes, Aura provisioning, and more.",
+  "author": {
+    "name": "Neo4j",
+    "email": "devrel@neo4j.com"
+  },
+  "homepage": "https://neo4j.com",
+  "repository": "https://github.com/neo4j-contrib/neo4j-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "neo4j",
+    "cypher",
+    "graph-database",
+    "graphrag",
+    "gds"
+  ],
+  "skills": "./"
+}

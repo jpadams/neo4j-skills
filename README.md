@@ -68,6 +68,43 @@ Start a new Codex thread after installation so Codex loads the plugin. To refres
 codex plugin marketplace upgrade neo4j-skills-marketplace
 ```
 
+### Qoder
+
+**Qoder IDE** — install the skills directly with the [skills CLI](https://github.com/vercel-labs/skills):
+
+```bash
+npx skills add https://github.com/jpadams/neo4j-skills -a qoder
+```
+
+This installs into the current project at `.qoder/skills/<skill-name>/`. Add `-g` to install user-wide to `~/.qoder/skills/` instead, or `-s <skill-name>` to install just one:
+
+```bash
+npx skills add https://github.com/jpadams/neo4j-skills -a qoder -g
+npx skills add https://github.com/jpadams/neo4j-skills -a qoder -s neo4j-cypher-skill
+```
+
+Restart Qoder IDE, then type `/` in the chat to confirm the skills are loaded. When a skill name exists at both scopes, the project-level copy wins.
+
+**Qoder CLI** — install as a plugin so all 29 skills stay versioned together:
+
+```bash
+qoder plugins marketplace add jpadams/neo4j-skills
+qoder plugins install neo4j-skills
+```
+
+Verify, then reload:
+
+```bash
+qoder plugins marketplace list
+qoder plugins list
+```
+
+Run `/skills reload` (or `/plugins reload`) inside a running session to pick up changes. To refresh the catalog later:
+
+```bash
+qoder plugins marketplace update neo4j-skills-marketplace
+```
+
 ## Available Skills
 
 ### Querying & Modeling

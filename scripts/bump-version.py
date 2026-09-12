@@ -11,6 +11,7 @@ Usage:
 Updates:
   - .claude-plugin/plugin.json
   - .codex-plugin/plugin.json
+  - .qoder-plugin/plugin.json
   - gemini-extension.json
   - version: field in all neo4j-*-skill/SKILL.md (adds if missing)
 
@@ -30,6 +31,7 @@ ROOT = Path(__file__).parent.parent
 VERSION_FILES = [
     ROOT / ".claude-plugin" / "plugin.json",
     ROOT / ".codex-plugin" / "plugin.json",
+    ROOT / ".qoder-plugin" / "plugin.json",
     ROOT / "gemini-extension.json",
 ]
 
@@ -192,7 +194,7 @@ def main() -> None:
     tag = f"v{new_version}"
     print("=" * 60)
     print("Lint passed. Review the diff, then run:\n")
-    print(f"  git add .claude-plugin/plugin.json .codex-plugin/plugin.json gemini-extension.json")
+    print(f"  git add .claude-plugin/plugin.json .codex-plugin/plugin.json .qoder-plugin/plugin.json gemini-extension.json")
     print(f"  git add neo4j-*-skill/SKILL.md")
     print(f'  git commit -m "release: bump version to {tag}"')
     print(f"  git tag {tag}")
