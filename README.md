@@ -8,9 +8,46 @@ Browse and install at **[skills.sh/neo4j-contrib/neo4j-skills](https://skills.sh
 npx skills add https://github.com/neo4j-contrib/neo4j-skills
 ```
 
-## Configuration
+## Connecting to your database
 
-Set these before or during installation:
+The skills teach an agent *how* to work with Neo4j. These give it access to *your* database. Pick one — they compose fine, but start at the top.
+
+### Aura — use the built-in MCP endpoint (recommended)
+
+Every Aura instance hosts its own MCP server. Nothing to install, and **no credentials stored anywhere** — you authorize once in the browser through the Aura Console:
+
+```
+https://<INSTANCE_ID>.mcp-instances.neo4j.io
+```
+
+`<INSTANCE_ID>` is the same ID as in your Bolt URI (`neo4j+s://<INSTANCE_ID>.databases.neo4j.io`). You can also copy it from the Aura Console via the instance `[…]` menu → **Inspect**, or list it with `neo4j-cli aura instance list`.
+
+```bash
+claude mcp add --transport http neo4j-mcp https://<INSTANCE_ID>.mcp-instances.neo4j.io   # Claude Code
+qoder mcp add neo4j-mcp -t http https://<INSTANCE_ID>.mcp-instances.neo4j.io -s user     # Qoder
+codex mcp add neo4j-mcp --url https://<INSTANCE_ID>.mcp-instances.neo4j.io               # Codex
+```
+
+On first connect the client opens a browser for the Aura Console sign-in. Some clients need an explicit nudge to start it — `codex mcp login neo4j-mcp`, or `/mcp` in a Qoder session.
+
+For Cursor, VS Code, Claude Desktop, and clients needing an stdio bridge, see [`neo4j-mcp-skill`](./neo4j-mcp-skill). Available on Free, Professional, and Business Critical tiers.
+
+### Any database — `neo4j-cli` credential profiles
+
+Store the connection once; the agent then passes a profile *name* and never handles the password:
+
+```bash
+neo4j-cli credential dbms add --name prod --uri neo4j+s://<INSTANCE_ID>.databases.neo4j.io --username neo4j --password "$PASS"
+neo4j-cli query --credential prod "MATCH (n) RETURN count(n)"
+```
+
+### Local, Docker, or self-hosted — run the MCP server yourself
+
+See [`neo4j-mcp-skill`](./neo4j-mcp-skill) for the stdio and HTTP setups.
+
+### Configuration
+
+Drivers, the skills' shell snippets, and the self-managed MCP server read these. `neo4j-cli` resolves credentials as flag > environment > `.env` walk-up > stored profile.
 
 | Variable | Description |
 |---|---|
@@ -104,6 +141,16 @@ Run `/skills reload` (or `/plugins reload`) inside a running session to pick up 
 ```bash
 qoder plugins marketplace update neo4j-skills-marketplace
 ```
+
+#### Connecting Qoder to your database
+
+See [Connecting to your database](#connecting-to-your-database) above. For Aura, the one-liner is:
+
+```bash
+qoder mcp add neo4j-mcp -t http https://<INSTANCE_ID>.mcp-instances.neo4j.io -s user
+```
+
+Then run `/mcp` in a Qoder session to trigger the browser login, and `/mcp reload` to pick up the tools.
 
 ## Available Skills
 

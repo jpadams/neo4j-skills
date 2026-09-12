@@ -1,9 +1,11 @@
 ---
 name: neo4j-mcp-skill
-description: Use when installing, configuring, or troubleshooting the official Neo4j MCP server
-  (neo4j/mcp) — connecting Claude Code, Claude Desktop, Cursor, Windsurf, VS Code,
-  Kiro, or other MCP-compatible editors to a Neo4j database via stdio or HTTP
-  transport. Covers the four MCP tools (get-schema, read-cypher, write-cypher,
+description: Use when connecting Claude Code, Claude Desktop, Cursor, Windsurf, VS Code, Qoder,
+  Kiro, or other MCP-compatible clients to a Neo4j database over MCP. Start with MCP for Aura,
+  the hosted per-instance endpoint at https://<INSTANCE_ID>.mcp-instances.neo4j.io that every
+  Aura instance exposes and that needs no stored credentials. Also covers installing and
+  troubleshooting the self-managed Neo4j MCP server (neo4j/mcp) over stdio or HTTP for local
+  and self-hosted databases, the four MCP tools (get-schema, read-cypher, write-cypher,
   list-gds-procedures), read-only mode, and multi-database configuration.
   Does NOT cover writing Cypher queries via those tools — use neo4j-cypher-skill.
   Does NOT cover agent memory — use neo4j-agent-memory-skill.
@@ -44,7 +46,95 @@ Installs and configures the [official Neo4j MCP server](https://github.com/neo4j
 
 ---
 
-## Installation
+## MCP for Aura (hosted)
+
+**Start here when the target database is Aura.** Every Aura instance exposes its own MCP server. Nothing to install, and **no credentials stored anywhere** — the client authenticates you through the Aura Console in your browser.
+
+Available on Free, Professional, and Business Critical tiers (Virtual Dedicated Cloud support is coming later).
+
+### Step 1 — Find the instance URL
+
+```
+https://<INSTANCE_ID>.mcp-instances.neo4j.io
+```
+
+`<INSTANCE_ID>` is the same ID as the host in your Bolt URI, so `neo4j+s://<INSTANCE_ID>.databases.neo4j.io` gives it to you directly. Two other ways to get it:
+
+- Aura Console → instance `[…]` menu → **Inspect** → copy the URL from the details panel.
+- `neo4j-cli aura instance list` → use the `id` field.
+
+### Step 2 — Add it to your client
+
+```bash
+# Claude Code
+claude mcp add --transport http neo4j-mcp https://<INSTANCE_ID>.mcp-instances.neo4j.io
+
+# Qoder
+qoder mcp add neo4j-mcp -t http https://<INSTANCE_ID>.mcp-instances.neo4j.io -s user
+```
+
+```json
+// VS Code — .vscode/mcp.json
+{
+  "servers": {
+    "neo4j-mcp": {
+      "type": "http",
+      "url": "https://<INSTANCE_ID>.mcp-instances.neo4j.io"
+    }
+  }
+}
+```
+
+```json
+// Cursor
+{
+  "mcpServers": {
+    "neo4j-mcp": {
+      "url": "https://<INSTANCE_ID>.mcp-instances.neo4j.io"
+    }
+  }
+}
+```
+
+For a client that cannot speak remote HTTP MCP directly (Claude Desktop today), bridge it over stdio:
+
+```json
+{
+  "mcpServers": {
+    "neo4j-mcp": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://<INSTANCE_ID>.mcp-instances.neo4j.io"]
+    }
+  }
+}
+```
+
+### Step 3 — Authorize in the browser
+
+On first connect the client opens a browser, you sign in with the Aura Console credentials you already use, and you are redirected back with a live session. Later requests reuse it until it expires.
+
+No `clientId` or `clientSecret` is needed. The endpoint returns OAuth protected-resource metadata (RFC 9728) naming its authorization server, and that server supports Dynamic Client Registration — so a spec-compliant MCP client discovers the issuer and registers itself. Supply the URL and nothing else.
+
+If a client insists on explicit OAuth fields, read the current values rather than hardcoding them:
+
+```bash
+curl -s https://<INSTANCE_ID>.mcp-instances.neo4j.io/.well-known/oauth-protected-resource
+# → {"authorization_servers": ["https://<issuer>/"], ...}
+curl -s https://<issuer>/.well-known/oauth-authorization-server
+# → authorization_endpoint, token_endpoint, registration_endpoint, scopes_supported
+```
+
+### Step 4 — Smoke test
+
+Ask the agent to call `get-schema`, or run `read-cypher` with `RETURN 'connected' AS status`. Same four tools as the self-managed server — only transport and auth differ.
+
+> **Not the same as [HTTP Transport](#http-transport) below.** That section runs *your own* `neo4j-mcp` process as a local HTTP service holding your credentials. This section is Neo4j's hosted endpoint, per Aura instance, with no credentials on your machine.
+
+---
+
+## Installation (self-managed)
+
+Use this path for **local, Docker, or self-hosted Neo4j** — or an Aura instance on a tier without a hosted endpoint. For Aura, prefer [MCP for Aura](#mcp-for-aura-hosted) above.
 
 ### Step 1 — Install and find the absolute path
 
@@ -211,6 +301,8 @@ and confirm it returns the node labels and relationship types you expect.
 
 HTTP transport runs the MCP server as a persistent network service — useful for shared servers, containers, or multiple clients.
 
+> This is a server **you** run and credential, on a host and port you choose. For Aura, the hosted per-instance endpoint in [MCP for Aura](#mcp-for-aura-hosted) needs no process and no stored credentials.
+
 ```bash
 # With credentials baked in (simpler — server authenticates all clients as the same user)
 neo4j-mcp \
@@ -293,6 +385,14 @@ Verify: `read-cypher: RETURN apoc.version() AS v` — if this fails, `get-schema
 
 ## Checklist
 
+**Aura (hosted)**
+- [ ] Target is Aura → hosted endpoint used, not a self-managed install
+- [ ] URL is `https://<INSTANCE_ID>.mcp-instances.neo4j.io` with the instance ID, not the Bolt host
+- [ ] Browser authorization completed on first connect
+- [ ] No `clientId`, `clientSecret`, or password placed in client config
+- [ ] Smoke test passed: `get-schema` returns labels
+
+**Self-managed**
 - [ ] `which neo4j-mcp` run and absolute path noted — this goes in `command`, not `neo4j-mcp`
 - [ ] Connectivity verified (`RETURN 'connected'`) before editing editor config
 - [ ] Credentials not committed to git; `.env` in `.gitignore`

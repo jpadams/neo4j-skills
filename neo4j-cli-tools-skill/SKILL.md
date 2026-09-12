@@ -126,7 +126,11 @@ Reference: [aura-cli-reference.md](references/aura-cli-reference.md)
 
 ### 5. neo4j-mcp
 
-MCP server for AI agent integration. For full install + editor config → use `neo4j-mcp-skill` (covers Claude Code, Desktop, Cursor, Windsurf, VS Code, Kiro, stdio vs HTTP transport, troubleshooting).
+MCP server for AI agent integration. For full install + editor config → use `neo4j-mcp-skill` (covers Claude Code, Desktop, Cursor, Windsurf, VS Code, Qoder, Kiro, hosted vs stdio vs HTTP transport, troubleshooting).
+
+**On Aura, do not install this.** Every Aura instance already exposes a hosted MCP endpoint at `https://<INSTANCE_ID>.mcp-instances.neo4j.io` — browser OAuth, no stored credentials, no local process. Get the ID from `neo4j-cli aura instance list`. See `neo4j-mcp-skill`.
+
+Install the self-managed server only for local, Docker, or self-hosted Neo4j:
 
 ```bash
 pip install neo4j-mcp-server && neo4j-mcp --version
